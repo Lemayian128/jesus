@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>M-Pesa Trader | Buy & Sell Crypto</title>
+<style>
+  :root {
+    --green: #0B6E4F;
+    --green-light: #14A37A;
+    --red: #C62828;
+    --red-light: #E53935;
+    --accent: #26A69A;
+    --bg: #0A0E14;
+    --bg-2: #0F1419;
+    --card: #161C24;
+    --card-hover: #1D242E;
+    --border: #232B36;
+    --text: #E6EDF3;
+    --muted: #8B96A5;
+    --gold: #F0B90B;
+    --blue: #2962FF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  button { cursor: pointer; font-family: inherit; }
+  input, select { font-family: inherit; }
+
+  #authScreen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(11,110,79,0.15), transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(240,185,11,0.08), transparent 50%),
+      var(--bg);
+  }
+  .auth-box {
+    width: 100%; max-width: 420px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .auth-logo { display: flex; align-items: center; gap: 12px; justify-content: center; margin-bottom: 24px; }
+  .auth-logo-icon {
+    width: 48px; height: 48px; background: linear-gradient(135deg, var(--green), var(--accent));
+    border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .auth-logo-text { font-size: 22px; font-weight: 700; }
+  .auth-tabs { display: flex; background: var(--bg); border-radius: 10px; padding: 4px; margin-bottom: 24px; }
+  .auth-tab {
+    flex: 1; padding: 10px; background: transparent; border: none; color: var(--muted);
+    font-weight: 600; border-radius: 8px; transition: all 0.2s; font-size: 14px;
+  }
+  .auth-tab.active { background: var(--green); color: #fff; }
+  .auth-form { display: none; }
+  .auth-form.active { display: block; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .form-group input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; color: var(--text); font-size: 14px; outline: none; transition: border 0.2s;
+  }
+  .form-group input:focus { border-color: var(--green); }
+  .form-error { color: var(--red-light); font-size: 12px; margin-top: 6px; display: none; }
+  .form-error.show { display: block; }
+  .btn-primary {
+    width: 100%; padding: 14px; background: var(--green); color: #fff; border: none;
+    border-radius: 10px; font-weight: 700; font-size: 15px; transition: background 0.2s;
+  }
+  .btn-primary:hover { background: var(--green-light); }
+  .auth-footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 20px; }
+
+  #appScreen { display: none; }
+  header {
+    background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 24px;
+    display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo-icon {
+    width: 36px; height: 36px; background: linear-gradient(135deg, var(--green), var(--accent));
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .header-logo-text { font-weight: 700; font-size: 17px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .balance-chip {
+    background: linear-gradient(135deg, var(--green), var(--green-light));
+    padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 14px;
+  }
+  .nav-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.2s;
+  }
+  .nav-btn:hover { border-color: var(--green); color: var(--green-light); }
+  .nav-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
+  .user-menu {
+    display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px;
+    background: var(--bg); border-radius: 20px; cursor: pointer;
+  }
+  .user-avatar {
+    width: 28px; height: 28px; background: var(--gold); color: #000; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;
+  }
+  .user-name { font-size: 13px; font-weight: 600; }
+  .logout-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: var(--red); color: var(--red-light); }
+
+  .app-main {
+    display: grid; grid-template-columns: 320px 1fr 340px; gap: 16px;
+    padding: 16px; max-width: 1600px; margin: 0 auto;
+  }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  .card-title {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--muted); margin-bottom: 14px; font-weight: 700;
+  }
+
+  .wallet-card {
+    background: linear-gradient(135deg, var(--green), #084D37); border-radius: 12px; padding: 20px;
+    margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1);
+  }
+  .wallet-label { font-size: 12px; color: rgba(255,255,255,0.75); }
+  .wallet-amount { font-size: 28px; font-weight: 800; margin-top: 6px; letter-spacing: -0.5px; }
+  .wallet-sub { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 10px; display: flex; justify-content: space-between; }
+
+  .input-group { margin-bottom: 12px; }
+  .input-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .input-group input, .input-group select {
+    width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 11px 12px; color: var(--text); font-size: 14px; outline: none; transition: border 0.2s;
+  }
+  .input-group input:focus, .input-group select:focus { border-color: var(--green); }
+  .input-group input[readonly] { color: var(--muted); cursor: not-allowed; }
+
+  .btn {
+    width: 100%; padding: 12px; border: none; border-radius: 8px;
+    font-weight: 700; font-size: 14px; transition: all 0.2s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover:not(:disabled) { background: var(--green-light); }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover:not(:disabled) { background: var(--red-light); }
+  .btn-blue { background: var(--blue); color: #fff; }
+  .btn-blue:hover:not(:disabled) { background: #1E4FD6; }
+
+  .deposit-methods { display: flex; gap: 8px; margin-bottom: 16px; background: var(--bg); padding: 4px; border-radius: 10px; }
+  .deposit-method {
+    flex: 1; padding: 10px 8px; border: none; background: transparent; color: var(--muted);
+    font-weight: 700; border-radius: 8px; font-size: 13px; transition: all 0.2s;
+  }
+  .deposit-method.active.mpesa { background: var(--green); color: #fff; }
+  .deposit-method.active.bank { background: var(--blue); color: #fff; }
+  .deposit-panel { display: none; }
+  .deposit-panel.active { display: block; }
+
+  .mpesa-modes { display: flex; gap: 6px; margin-bottom: 12px; background: var(--bg); padding: 4px; border-radius: 10px; }
+  .mpesa-mode {
+    flex: 1; padding: 8px 6px; border: none; background: transparent; color: var(--muted);
+    font-weight: 700; border-radius: 7px; font-size: 11px; transition: all 0.2s;
+  }
+  .mpesa-mode.active { background: var(--green); color: #fff; }
+  .mpesa-mode-panel { display: none; }
+  .mpesa-mode-panel.active { display: block; }
+
+  .pay-info {
+    background: var(--bg); border-radius: 10px; padding: 12px;
+    margin-bottom: 12px; border: 1px solid var(--border);
+  }
+  .pay-info-title {
+    font-size: 11px; text-transform: uppercase; color: var(--muted);
+    font-weight: 700; letter-spacing: 0.5px; margin-bottom: 10px;
+  }
+  .pay-info-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+  .pay-info-label { color: var(--muted); font-size: 12px; }
+  .pay-info-value {
+    font-family: 'SF Mono', 'Courier New', monospace; font-weight: 700; font-size: 14px;
+    letter-spacing: 0.5px; color: var(--text); flex: 1; text-align: right; margin-right: 8px;
+  }
+  .copy-btn {
+    background: var(--card-hover); border: 1px solid var(--border); color: var(--muted);
+    padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; transition: all 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--green); color: var(--green-light); }
+
+  .steps-hint {
+    background: rgba(11,110,79,0.08); border-left: 3px solid var(--green); border-radius: 6px;
+    padding: 10px 12px; font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.5;
+  }
+  .steps-hint strong { color: var(--text); display: block; margin-bottom: 6px; font-size: 12px; }
+  .steps-hint ol { padding-left: 18px; margin: 0; }
+  .steps-hint li { margin-bottom: 3px; }
+  .steps-hint b { color: var(--green-light); font-family: 'SF Mono', monospace; }
+
+  .bank-details {
+    background: var(--bg); border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 12px;
+  }
+  .bank-details .row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--border); gap: 8px;
+  }
+  .bank-details .row:last-child { border-bottom: none; }
+  .bank-details .label { color: var(--muted); font-size: 12px; }
+  .bank-details .value {
+    font-weight: 600; font-family: 'SF Mono', monospace; flex: 1; text-align: right; font-size: 12px;
+  }
+
+  .symbol-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+  .symbol-tab {
+    padding: 8px 16px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border);
+    color: var(--muted); font-weight: 700; font-size: 13px; transition: all 0.2s; white-space: nowrap;
+  }
+  .symbol-tab.active { background: var(--green); color: #fff; border-color: var(--green); }
+
+  .price-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
+  .price-current { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
+  .price-change { font-size: 14px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+  .price-change.up { color: var(--accent); background: rgba(38,166,154,0.1); }
+  .price-change.down { color: var(--red-light); background: rgba(198,40,40,0.1); }
+  #chart { width: 100%; height: 240px; background: var(--bg); border-radius: 8px; display: block; }
+
+  .book { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .book-col-title {
+    font-size: 11px; color: var(--muted); margin-bottom: 8px;
+    text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .book-row {
+    display: flex; justify-content: space-between; padding: 4px 8px; font-size: 13px;
+    font-family: 'SF Mono', 'Courier New', monospace; border-radius: 4px; transition: background 0.15s;
+  }
+  .book-row:hover { background: rgba(255,255,255,0.04); }
+  .book-row.bid span:first-child { color: var(--accent); }
+  .book-row.ask span:first-child { color: var(--red-light); }
+  .book-row span:last-child { color: var(--muted); }
+  .spread {
+    text-align: center; padding: 10px; font-size: 12px; color: var(--muted);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    margin: 10px 0; font-family: 'SF Mono', monospace;
+  }
+
+  .side-tabs { display: flex; gap: 8px; margin-bottom: 14px; background: var(--bg); padding: 4px; border-radius: 10px; }
+  .side-tab {
+    flex: 1; padding: 10px; border: none; background: transparent; color: var(--muted);
+    font-weight: 700; border-radius: 8px; font-size: 13px; transition: all 0.2s;
+  }
+  .side-tab.buy.active { background: var(--green); color: #fff; }
+  .side-tab.sell.active { background: var(--red); color: #fff; }
+  .quick-amounts { display: flex; gap: 6px; margin-top: 6px; }
+  .quick-amounts button {
+    flex: 1; padding: 6px; background: var(--bg); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 6px; font-size: 11px; font-weight: 600; transition: all 0.2s;
+  }
+  .quick-amounts button:hover { border-color: var(--green); color: var(--text); }
+
+  .list-empty { text-align: center; color: var(--muted); font-size: 13px; padding: 20px 0; }
+  .holding-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px; background: var(--bg); border-radius: 8px; margin-bottom: 8px; font-size: 13px;
+  }
+  .holding-sym { font-weight: 700; font-size: 14px; }
+  .holding-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .holding-value { font-weight: 700; text-align: right; }
+  .holding-pnl { font-size: 11px; margin-top: 2px; text-align: right; }
+  .holding-pnl.up { color: var(--accent); }
+  .holding-pnl.down { color: var(--red-light); }
+  .trade-row {
+    display: flex; justify-content: space-between; padding: 6px 8px; font-size: 12px;
+    font-family: 'SF Mono', monospace; border-radius: 4px; margin-bottom: 4px;
+  }
+  .trade-row.buy { background: rgba(38,166,154,0.08); }
+  .trade-row.sell { background: rgba(198,40,40,0.08); }
+
+  .tx-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px; background: var(--bg); border-radius: 8px; margin-bottom: 8px;
+    border-left: 3px solid var(--muted);
+  }
+  .tx-row.deposit { border-left-color: var(--green); }
+  .tx-row.withdraw { border-left-color: var(--gold); }
+  .tx-row.trade-buy { border-left-color: var(--accent); }
+  .tx-row.trade-sell { border-left-color: var(--red-light); }
+  .tx-left { display: flex; flex-direction: column; gap: 2px; }
+  .tx-title { font-size: 13px; font-weight: 700; }
+  .tx-meta { font-size: 11px; color: var(--muted); font-family: 'SF Mono', monospace; }
+  .tx-right { text-align: right; }
+  .tx-amount { font-size: 14px; font-weight: 700; }
+  .tx-amount.positive { color: var(--accent); }
+  .tx-amount.negative { color: var(--red-light); }
+  .tx-status {
+    font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-top: 4px;
+    display: inline-block; font-weight: 700; text-transform: uppercase;
+  }
+  .tx-status.pending { background: rgba(240,185,11,0.15); color: var(--gold); }
+  .tx-status.approved { background: rgba(38,166,154,0.15); color: var(--accent); }
+  .tx-status.rejected { background: rgba(198,40,40,0.15); color: var(--red-light); }
+  .tx-status.completed { background: rgba(38,166,154,0.15); color: var(--accent); }
+
+  #toast {
+    position: fixed; bottom: 24px; right: 24px; background: var(--card);
+    border: 1px solid var(--border); border-left: 4px solid var(--green);
+    padding: 14px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
+    display: none; z-index: 9999; max-width: 340px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5); animation: slideIn 0.3s ease;
+  }
+  #toast.error { border-left-color: var(--red); }
+  #toast.info { border-left-color: var(--gold); }
+  #toast.bank { border-left-color: var(--blue); }
+  @keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* Live status badge */
+  .badge-live {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); margin-right: 6px;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .badge-offline { background: var(--red); animation: none; }
+
+  @media (max-width: 1100px) {
+    .app-main { grid-template-columns: 1fr; }
+    header { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+    .balance-chip { font-size: 12px; padding: 6px 12px; }
+    .user-name { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     AUTH SCREEN
+     ═══════════════════════════════════════════════════════════ -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">⚡</div>
+      <div class="auth-logo-text">M-Pesa Trader</div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')">Create Account</button>
+    </div>
+
+    <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginIdentifier" placeholder="you@example.com" required />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required />
+      </div>
+      <div class="form-error" id="loginError"></div>
+      <button type="submit" class="btn-primary">Login</button>
+    </form>
+
+    <form class="auth-form" id="signupForm" onsubmit="handleSignup(event)">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="signupName" placeholder="John Doe" required />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" required />
+      </div>
+      <div class="form-group">
+        <label>M-Pesa Phone (2547XXXXXXXX)</label>
+        <input type="tel" id="signupPhone" placeholder="254712345678" required />
+      </div>
+      <div class="form-group">
+        <label>Password (min 6 chars)</label>
+        <input type="password" id="signupPassword" placeholder="••••••••" required />
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="signupConfirm" placeholder="••••••••" required />
+      </div>
+      <div class="form-error" id="signupError"></div>
+      <button type="submit" class="btn-primary">Create Account</button>
+    </form>
+
+    <div class="auth-footer">
+      <span id="backendStatus" class="badge-live"></span>
+      <span id="backendStatusText">Connecting to backend...</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     APP SCREEN
+     ═══════════════════════════════════════════════════════════ -->
+<div id="appScreen">
+  <header>
+    <div class="header-left">
+      <div class="header-logo-icon">⚡</div>
+      <div class="header-logo-text">M-Pesa Trader</div>
+    </div>
+    <div class="header-right">
+      <button class="nav-btn active" id="navTrade" onclick="switchView('trade')">📈 Trade</button>
+      <button class="nav-btn" id="navHistory" onclick="switchView('history')">📜 History</button>
+      <button class="nav-btn" id="navAdmin" onclick="switchView('admin')" style="display:none;">🛡️ Admin</button>
+      <div class="balance-chip">KES <span id="headerBalance">0</span></div>
+      <div class="user-menu">
+        <div class="user-avatar" id="userAvatar">JD</div>
+        <div class="user-name" id="userNameDisplay">John</div>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- ═══════ TRADE VIEW ═══════ -->
+  <div id="tradeView">
+    <div class="app-main">
+      <!-- LEFT -->
+      <aside>
+        <div class="wallet-card">
+          <div class="wallet-label">Available Balance</div>
+          <div class="wallet-amount">KES <span id="balance">0</span></div>
+          <div class="wallet-sub">
+            <span>Net Worth</span>
+            <span>KES <span id="netWorth">0</span></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">💰 Deposit Funds</div>
+
+          <div class="deposit-methods">
+            <button class="deposit-method mpesa active" id="mpesaMethodBtn" onclick="switchDepositMethod('mpesa')">📱 M-Pesa</button>
+            <button class="deposit-method bank" id="bankMethodBtn" onclick="switchDepositMethod('bank')">🏦 Bank</button>
+          </div>
+
+          <!-- M-PESA PANEL — now uses STK Push -->
+          <div class="deposit-panel active" id="mpesaPanel">
+            <div class="mpesa-modes">
+              <button class="mpesa-mode active" id="modeStkBtn" onclick="switchMpesaMode('stk')">⚡ STK Push</button>
+              <button class="mpesa-mode" id="modeManualBtn" onclick="switchMpesaMode('manual')">📋 Manual Pay</button>
+            </div>
+
+            <!-- STK Push panel — REAL FLOW -->
+            <div class="mpesa-mode-panel active" id="stkPanel">
+              <div class="steps-hint">
+                <strong>How STK Push works:</strong>
+                <ol>
+                  <li>Enter your M-Pesa phone + amount</li>
+                  <li>Click "Send STK Push"</li>
+                  <li>You get a prompt on your phone</li>
+                  <li>Enter your M-Pesa PIN</li>
+                  <li>Balance updates automatically</li>
+                </ol>
+              </div>
+              <div class="input-group">
+                <label>M-Pesa Phone</label>
+                <input type="tel" id="mpesaPhone" placeholder="254712345678" />
+              </div>
+              <div class="input-group">
+                <label>Amount (KES)</label>
+                <input type="number" id="depositAmount" placeholder="1000" min="1" />
+                <div class="quick-amounts">
+                  <button onclick="setDeposit(10)">10</button>
+                  <button onclick="setDeposit(100)">100</button>
+                  <button onclick="setDeposit(500)">500</button>
+                  <button onclick="setDeposit(1000)">1K</button>
+                </div>
+              </div>
+              <button class="btn btn-green" id="depositBtn" onclick="handleSTKPush()">
+                📲 Send STK Push
+              </button>
+              <div id="stkStatus" style="font-size: 12px; color: var(--muted); margin-top: 10px; text-align: center;"></div>
+            </div>
+
+            <!-- Manual Pay panel — copy numbers -->
+            <div class="mpesa-mode-panel" id="manualPanel">
+              <div class="pay-info">
+                <div class="pay-info-title">Buy Goods & Services</div>
+                <div class="pay-info-row">
+                  <span class="pay-info-label">Till Number</span>
+                  <span class="pay-info-value">5842391</span>
+                  <button class="copy-btn" onclick="copyText('5842391', 'Till number copied')">Copy</button>
+                </div>
+                <div class="pay-info-row">
+                  <span class="pay-info-label">Business</span>
+                  <span class="pay-info-value">M-PESA TRADER LTD</span>
+                </div>
+              </div>
+              <div class="pay-info">
+                <div class="pay-info-title">Pay Bill</div>
+                <div class="pay-info-row">
+                  <span class="pay-info-label">Business No</span>
+                  <span class="pay-info-value">247247</span>
+                  <button class="copy-btn" onclick="copyText('247247', 'Paybill copied')">Copy</button>
+                </div>
+                <div class="pay-info-row">
+                  <span class="pay-info-label">Account No</span>
+                  <span class="pay-info-value" id="paybillAccount">MPT-XXXXX</span>
+                  <button class="copy-btn" onclick="copyText(document.getElementById('paybillAccount').textContent, 'Account copied')">Copy</button>
+                </div>
+              </div>
+              <div class="pay-info">
+                <div class="pay-info-title">Send Money</div>
+                <div class="pay-info-row">
+                  <span class="pay-info-label">Phone</span>
+                  <span class="pay-info-value">0709123456</span>
+                  <button class="copy-btn" onclick="copyText('0709123456', 'Phone copied')">Copy</button>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label>Amount Sent (KES)</label>
+                <input type="number" id="manualAmount" placeholder="1000" min="10" />
+              </div>
+              <div class="input-group">
+                <label>M-Pesa Ref Code</label>
+                <input type="text" id="manualRef" placeholder="e.g. QK4RT8WXYZ" maxlength="12" />
+              </div>
+              <button class="btn btn-green" onclick="handleManualMpesa()">✅ I Have Paid</button>
+            </div>
+          </div>
+
+          <!-- BANK PANEL -->
+          <div class="deposit-panel" id="bankPanel">
+            <div class="bank-details">
+              <div class="row"><span class="label">Bank</span><span class="value">Equity Bank</span></div>
+              <div class="row"><span class="label">Account Name</span><span class="value">M-Pesa Trader Ltd</span></div>
+              <div class="row">
+                <span class="label">Account No</span>
+                <span class="value">017027458932</span>
+                <button class="copy-btn" onclick="copyText('017027458932', 'Account copied')">Copy</button>
+              </div>
+              <div class="row"><span class="label">Branch</span><span class="value">Westlands, Nairobi</span></div>
+              <div class="row"><span class="label">SWIFT</span><span class="value">EQBLKENA</span></div>
+            </div>
+            <div class="input-group">
+              <label>Amount Sent (KES)</label>
+              <input type="number" id="bankAmount" placeholder="5000" min="100" />
+              <div class="quick-amounts">
+                <button onclick="setBankDeposit(1000)">1K</button>
+                <button onclick="setBankDeposit(5000)">5K</button>
+                <button onclick="setBankDeposit(10000)">10K</button>
+                <button onclick="setBankDeposit(50000)">50K</button>
+              </div>
+            </div>
+            <div class="input-group">
+              <label>Bank Reference</label>
+              <input type="text" id="bankRef" placeholder="e.g. FT2103XYZ" />
+            </div>
+            <button class="btn btn-blue" onclick="handleBankDeposit()">✅ I Have Sent the Money</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">💸 Withdraw Funds</div>
+          <div class="input-group">
+            <label>Destination</label>
+            <select id="withdrawDest">
+              <option value="mpesa">M-Pesa</option>
+              <option value="bank">Bank Transfer</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Phone / Account</label>
+            <input type="text" id="withdrawTarget" placeholder="254712345678" />
+          </div>
+          <div class="input-group">
+            <label>Amount (KES)</label>
+            <input type="number" id="withdrawAmount" placeholder="500" min="100" />
+          </div>
+          <button class="btn btn-red" onclick="handleWithdraw()">Request Withdrawal</button>
+          <div style="font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center;">
+            Minimum KES 100 · Processed within 24 hrs
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📊 Your Holdings</div>
+          <div id="holdingsList"><div class="list-empty">No holdings yet</div></div>
+        </div>
+      </aside>
+
+      <!-- CENTER -->
+      <main>
+        <div class="card">
+          <div class="symbol-tabs" id="symbolTabs"></div>
+          <div class="price-header">
+            <div>
+              <div class="price-current">$<span id="livePrice">—</span></div>
+              <div style="font-size:11px; color:var(--muted); margin-top:4px;">Live market feed · Paper trading</div>
+            </div>
+            <div class="price-change up" id="priceChange">+0.00%</div>
+          </div>
+          <canvas id="chart"></canvas>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📖 Order Book</div>
+          <div class="book">
+            <div>
+              <div class="book-col-title">Bids (Buy)</div>
+              <div id="bidsList"></div>
+            </div>
+            <div>
+              <div class="book-col-title">Asks (Sell)</div>
+              <div id="asksList"></div>
+            </div>
+          </div>
+          <div class="spread" id="spread">Spread: —</div>
+        </div>
+      </main>
+
+      <!-- RIGHT -->
+      <aside>
+        <div class="card">
+          <div class="card-title">🎯 Place Order</div>
+          <div class="side-tabs">
+            <button class="side-tab buy active" id="buyTab" onclick="setSide('buy')">BUY</button>
+            <button class="side-tab sell" id="sellTab" onclick="setSide('sell')">SELL</button>
+          </div>
+          <div class="input-group">
+            <label>Limit Price (USD)</label>
+            <input type="number" id="orderPrice" step="0.01" />
+          </div>
+          <div class="input-group">
+            <label>Quantity</label>
+            <input type="number" id="orderQty" step="0.0001" />
+          </div>
+          <div class="input-group">
+            <label>Total Cost</label>
+            <input type="text" id="orderTotal" readonly value="$0.00" />
+          </div>
+          <button class="btn btn-green" id="submitOrderBtn" onclick="submitOrder()">Place Buy Order</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">⚡ Recent Trades</div>
+          <div id="tradesList"><div class="list-empty">No trades yet</div></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ═══════ HISTORY VIEW ═══════ -->
+  <div id="historyView" style="display:none;">
+    <div style="max-width: 900px; margin: 16px auto; padding: 0 16px;">
+      <div class="card">
+        <div class="card-title">
+          📜 Transaction History
+          <button class="copy-btn" style="float:right;" onclick="refreshHistory()">Refresh</button>
+        </div>
+        <div id="txHistoryList"><div class="list-empty">No transactions yet</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ ADMIN VIEW ═══════ -->
+  <div id="adminView" style="display:none;">
+    <div style="max-width: 1100px; margin: 16px auto; padding: 0 16px;">
+      <div class="card">
+        <div class="card-title">
+          🛡️ Pending Transactions
+          <button class="copy-btn" style="float:right;" onclick="renderAdmin()">Refresh</button>
+        </div>
+        <div id="adminPendingList"><div class="list-empty">No pending transactions</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">👥 All Users</div>
+        <div id="adminUsersList"><div class="list-empty">No users yet</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 All Transactions</div>
+        <div id="adminAllTxList"><div class="list-empty">No transactions yet</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIG — CHANGE THIS IF YOUR BACKEND RUNS ELSEWHERE
+   ═══════════════════════════════════════════════════════════ */
+const API_BASE = 'http://localhost:4000';
+const ADMIN_KEY = 'change_this_to_a_random_secret'; // must match .env ADMIN_API_KEY
+
+/* ═══════════════════════════════════════════════════════════
+   CONSTANTS
+   ═══════════════════════════════════════════════════════════ */
+const USERS_KEY = 'mpesa_trader_users';
+const SESSION_KEY = 'mpesa_trader_session';
+const ADMIN_EMAIL = 'admin@mpesatrader.com';
+const ADMIN_PASSWORD = 'admin123';
+
+const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT'];
+const BASE_PRICES = { BTCUSDT: 95000, ETHUSDT: 3400, SOLUSDT: 180 };
+
+let currentUser = null;
+
+/* ═══════════════════════════════════════════════════════════
+   API HELPERS
+   ═══════════════════════════════════════════════════════════ */
+async function api(path, options = {}) {
+  const url = API_BASE + path;
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || data.details || `HTTP ${res.status}`);
+    err.status = res.status;
+    err.data = data;
+    throw err;
+  }
+  return data;
+}
+
+async function apiAdmin(path, options = {}) {
+  return api(path, {
+    ...options,
+    headers: { 'x-admin-key': ADMIN_KEY, ...(options.headers || {}) },
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BACKEND HEALTH CHECK
+   ═══════════════════════════════════════════════════════════ */
+async function checkBackend() {
+  const dot = document.getElementById('backendStatus');
+  const txt = document.getElementById('backendStatusText');
+  try {
+    const h = await api('/api/health');
+    dot.className = 'badge-live';
+    txt.textContent = `Backend online · ${h.users} users · ${h.transactions} tx`;
+  } catch (e) {
+    dot.className = 'badge-live badge-offline';
+    txt.textContent = `Backend offline (${API_BASE}) — start server.js`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STORAGE (local user session only — real users live on backend)
+   ═══════════════════════════════════════════════════════════ */
+function getLocalUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY)) || {}; } catch { return {}; } }
+function saveLocalUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+
+/* ═══════════════════════════════════════════════════════════
+   AUTH
+   ═══════════════════════════════════════════════════════════ */
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((el, i) => {
+    el.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'signup'));
+  });
+  document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+  document.getElementById('signupForm').classList.toggle('active', tab === 'signup');
+  document.getElementById('loginError').classList.remove('show');
+  document.getElementById('signupError').classList.remove('show');
+}
+
+function showAuthError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+async function handleSignup(e) {
+  e.preventDefault();
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim().toLowerCase();
+  const phone = document.getElementById('signupPhone').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('signupConfirm').value;
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showAuthError('signupError', 'Enter a valid email');
+  if (!/^254\d{9}$/.test(phone)) return showAuthError('signupError', 'Phone must be 2547XXXXXXXX');
+  if (password.length < 6) return showAuthError('signupError', 'Password min 6 chars');
+  if (password !== confirm) return showAuthError('signupError', 'Passwords do not match');
+
+  // Check local duplicate
+  const local = getLocalUsers();
+  if (local[email]) return showAuthError('signupError', 'Email already exists');
+
+  // Create user on backend
+  try {
+    const remote = await api('/api/user', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, phone }),
+    });
+
+    // Save local mapping (email → {id, password, name})
+    local[email] = { id: remote.id, name, email, phone, password };
+    saveLocalUsers(local);
+
+    showToast('✅ Account created! Logging you in...');
+    setTimeout(() => startSession(remote), 700);
+  } catch (err) {
+    showAuthError('signupError', err.message);
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const id = document.getElementById('loginIdentifier').value.trim().toLowerCase();
+  const pw = document.getElementById('loginPassword').value;
+
+  // Admin shortcut
+  if (id === ADMIN_EMAIL && pw === ADMIN_PASSWORD) {
+    currentUser = { id: 'admin', name: 'Admin', email: ADMIN_EMAIL, isAdmin: true, balance: 0, holdings: {} };
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ type: 'admin' }));
+    enterApp();
+    return;
+  }
+
+  // Local lookup
+  const local = getLocalUsers();
+  const entry = local[id];
+  if (!entry) return showAuthError('loginError', 'Account not found');
+  if (entry.password !== pw) return showAuthError('loginError', 'Incorrect password');
+
+  // Fetch latest state from backend
+  try {
+    const remote = await api(`/api/user/${entry.id}`);
+    startSession(remote);
+  } catch (err) {
+    // Backend down → use local fallback (offline demo mode)
+    showToast('⚠️ Backend offline — using local cache', false, 'info');
+    startSession({ id: entry.id, name: entry.name, email: entry.email, phone: entry.phone, balance: 100000, holdings: {} });
+  }
+}
+
+function startSession(user) {
+  currentUser = user;
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ type: 'user', id: user.id }));
+  enterApp();
+}
+
+function handleLogout() {
+  if (!confirm('Log out?')) return;
+  localStorage.removeItem(SESSION_KEY);
+  currentUser = null;
+  location.reload();
+}
+
+async function autoLogin() {
+  const raw = localStorage.getItem(SESSION_KEY);
+  if (!raw) return;
+  try {
+    const session = JSON.parse(raw);
+    if (session.type === 'admin') {
+      currentUser = { id: 'admin', name: 'Admin', email: ADMIN_EMAIL, isAdmin: true, balance: 0, holdings: {} };
+      enterApp();
+      return;
+    }
+    const user = await api(`/api/user/${session.id}`);
+    currentUser = user;
+    enterApp();
+  } catch (e) {
+    localStorage.removeItem(SESSION_KEY);
+  }
+}
+
+function enterApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+
+  document.getElementById('userNameDisplay').textContent = currentUser.name.split(' ')[0];
+  document.getElementById('userAvatar').textContent = currentUser.name
+    .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+  if (currentUser.isAdmin) {
+    document.getElementById('navAdmin').style.display = 'inline-block';
+    document.getElementById('navTrade').style.display = 'none';
+    switchView('admin');
+    renderAdmin();
+    return;
+  }
+
+  document.getElementById('mpesaPhone').value = currentUser.phone || '';
+  const acc = 'MPT-' + currentUser.id.slice(-5).toUpperCase();
+  document.getElementById('paybillAccount').textContent = acc;
+
+  state.balance = Number(currentUser.balance) || 0;
+  state.holdings = currentUser.holdings || {};
+  state.trades = currentUser.trades || [];
+
+  rebuildBooks();
+  renderAll();
+  startPriceFeed();
+  refreshHistory();
+
+  // Poll balance every 8s (for approved deposits)
+  if (state.balanceTimer) clearInterval(state.balanceTimer);
+  state.balanceTimer = setInterval(syncBalance, 8000);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════ */
+const state = {
+  balance: 0, holdings: {}, symbol: 'BTCUSDT', side: 'buy',
+  prices: {}, prevPrices: {}, books: {}, trades: [],
+  priceTimer: null, balanceTimer: null, pollTimer: null,
+};
+
+function persistLocal() {
+  // Only persist non-balance fields (balance comes from backend)
+  if (!currentUser || currentUser.isAdmin) return;
+  const local = getLocalUsers();
+  if (local[currentUser.email]) {
+    local[currentUser.email].holdings = state.holdings;
+    local[currentUser.email].trades = state.trades;
+    saveLocalUsers(local);
+  }
+}
+
+async function syncBalance() {
+  if (!currentUser || currentUser.isAdmin) return;
+  try {
+    const user = await api(`/api/user/${currentUser.id}`);
+    if (Number(user.balance) !== state.balance) {
+      const diff = Number(user.balance) - state.balance;
+      state.balance = Number(user.balance);
+      currentUser.balance = state.balance;
+      if (diff > 0) showToast(`✅ KES ${diff.toLocaleString()} credited`);
+      renderAll();
+    }
+  } catch (e) { /* silent */ }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRICE FEED (mock — replace with Binance WS later)
+   ═══════════════════════════════════════════════════════════ */
+function startPriceFeed() {
+  if (state.priceTimer) clearInterval(state.priceTimer);
+  SYMBOLS.forEach(s => { if (!state.prices[s]) state.prices[s] = BASE_PRICES[s]; });
+  state.priceTimer = setInterval(() => {
+    SYMBOLS.forEach(s => {
+      state.prevPrices[s] = state.prices[s];
+      const drift = (Math.random() - 0.5) * 0.006;
+      state.prices[s] = Math.max(1, state.prices[s] * (1 + drift));
+    });
+    rebuildBooks();
+    renderAll();
+  }, 2000);
+}
+
+function rebuildBooks() {
+  SYMBOLS.forEach(sym => {
+    const mid = state.prices[sym] || BASE_PRICES[sym];
+    const bids = [], asks = [];
+    for (let i = 1; i <= 8; i++) {
+      bids.push({ price: +(mid * (1 - i * 0.0008)).toFixed(2), quantity: +(Math.random() * 2 + 0.1).toFixed(4) });
+      asks.push({ price: +(mid * (1 + i * 0.0008)).toFixed(2), quantity: +(Math.random() * 2 + 0.1).toFixed(4) });
+    }
+    state.books[sym] = { bids, asks };
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════════ */
+function renderAll() {
+  renderWallet();
+  renderSymbolTabs();
+  renderPrice();
+  renderOrderBook();
+  renderHoldings();
+  renderTrades();
+  drawChart();
+  persistLocal();
+}
+
+function renderWallet() {
+  const bal = Math.round(state.balance);
+  document.getElementById('balance').textContent = bal.toLocaleString();
+  document.getElementById('headerBalance').textContent = bal.toLocaleString();
+  const hv = Object.entries(state.holdings).reduce((s, [sym, h]) => s + h.qty * (state.prices[sym] || 0), 0);
+  document.getElementById('netWorth').textContent = Math.round(state.balance + hv).toLocaleString();
+}
+
+function renderSymbolTabs() {
+  const c = document.getElementById('symbolTabs');
+  if (c.dataset.built) return;
+  c.dataset.built = '1';
+  c.innerHTML = SYMBOLS.map(s =>
+    `<button class="symbol-tab ${s === state.symbol ? 'active' : ''}" data-sym="${s}" onclick="selectSymbol('${s}')">${s.replace('USDT','/USDT')}</button>`
+  ).join('');
+}
+
+function selectSymbol(sym) {
+  state.symbol = sym;
+  document.querySelectorAll('.symbol-tab').forEach(el => el.classList.toggle('active', el.dataset.sym === sym));
+  renderAll();
+}
+
+function renderPrice() {
+  const sym = state.symbol;
+  const price = state.prices[sym] || 0;
+  const prev = state.prevPrices[sym] || price;
+  const change = prev ? ((price - prev) / prev) * 100 : 0;
+  document.getElementById('livePrice').textContent = price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const el = document.getElementById('priceChange');
+  el.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+  el.className = 'price-change ' + (change >= 0 ? 'up' : 'down');
+  const inp = document.getElementById('orderPrice');
+  if (!inp.value) inp.value = price.toFixed(2);
+}
+
+function renderOrderBook() {
+  const b = state.books[state.symbol];
+  if (!b) return;
+  document.getElementById('bidsList').innerHTML = b.bids.slice(0, 6)
+    .map(x => `<div class="book-row bid"><span>${x.price.toLocaleString()}</span><span>${x.quantity}</span></div>`).join('');
+  document.getElementById('asksList').innerHTML = b.asks.slice(0, 6)
+    .map(x => `<div class="book-row ask"><span>${x.price.toLocaleString()}</span><span>${x.quantity}</span></div>`).join('');
+  const bb = b.bids[0]?.price || 0, ba = b.asks[0]?.price || 0;
+  document.getElementById('spread').textContent = `Spread: $${(ba - bb).toFixed(2)} · Best Bid $${bb.toLocaleString()} · Best Ask $${ba.toLocaleString()}`;
+}
+
+function renderHoldings() {
+  const list = document.getElementById('holdingsList');
+  const entries = Object.entries(state.holdings);
+  if (!entries.length) { list.innerHTML = '<div class="list-empty">No holdings yet</div>'; return; }
+  list.innerHTML = entries.map(([sym, h]) => {
+    const val = h.qty * (state.prices[sym] || 0);
+    const cost = h.qty * h.avgPrice;
+    const pnl = val - cost;
+    const pct = cost ? (pnl / cost) * 100 : 0;
+    const cls = pnl >= 0 ? 'up' : 'down';
+    const sign = pnl >= 0 ? '+' : '';
+    return `<div class="holding-row">
+      <div>
+        <div class="holding-sym">${sym.replace('USDT','')}</div>
+        <div class="holding-meta">${h.qty.toFixed(4)} @ $${h.avgPrice.toFixed(2)}</div>
+      </div>
+      <div>
+        <div class="holding-value">$${val.toFixed(2)}</div>
+        <div class="holding-pnl ${cls}">${sign}${pnl.toFixed(2)} (${sign}${pct.toFixed(2)}%)</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTrades() {
+  const list = document.getElementById('tradesList');
+  const recent = state.trades.slice(-6).reverse();
+  if (!recent.length) { list.innerHTML = '<div class="list-empty">No trades yet</div>'; return; }
+  list.innerHTML = recent.map(t => `
+    <div class="trade-row ${t.side}">
+      <span>${t.side.toUpperCase()} ${t.qty.toFixed(4)} ${t.symbol.replace('USDT','')}</span>
+      <span>$${t.price.toFixed(2)}</span>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHART
+   ═══════════════════════════════════════════════════════════ */
+const chartHistory = {};
+function drawChart() {
+  const canvas = document.getElementById('chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.offsetWidth * dpr;
+  canvas.height = canvas.offsetHeight * dpr;
+  ctx.scale(dpr, dpr);
+  const w = canvas.offsetWidth, h = canvas.offsetHeight;
+  const sym = state.symbol;
+  if (!chartHistory[sym]) chartHistory[sym] = [];
+  chartHistory[sym].push(state.prices[sym]);
+  if (chartHistory[sym].length > 60) chartHistory[sym].shift();
+  const data = chartHistory[sym];
+  if (data.length < 2) return;
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 1;
+  ctx.clearRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  for (let i = 0; i <= 4; i++) {
+    const y = (h / 4) * i;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+  const isUp = data[data.length - 1] >= data[0];
+  ctx.strokeStyle = isUp ? '#26A69A' : '#C62828';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  data.forEach((p, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((p - min) / range) * (h - 20) - 10;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, isUp ? 'rgba(38,166,154,0.3)' : 'rgba(198,40,40,0.3)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DEPOSIT UI SWITCHERS
+   ═══════════════════════════════════════════════════════════ */
+function switchDepositMethod(m) {
+  document.getElementById('mpesaMethodBtn').classList.toggle('active', m === 'mpesa');
+  document.getElementById('bankMethodBtn').classList.toggle('active', m === 'bank');
+  document.getElementById('mpesaPanel').classList.toggle('active', m === 'mpesa');
+  document.getElementById('bankPanel').classList.toggle('active', m === 'bank');
+}
+
+function switchMpesaMode(m) {
+  document.getElementById('modeStkBtn').classList.toggle('active', m === 'stk');
+  document.getElementById('modeManualBtn').classList.toggle('active', m === 'manual');
+  document.getElementById('stkPanel').classList.toggle('active', m === 'stk');
+  document.getElementById('manualPanel').classList.toggle('active', m === 'manual');
+}
+
+function copyText(text, msg = 'Copied!') {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast('📋 ' + msg)).catch(() => fbCopy(text, msg));
+  } else fbCopy(text, msg);
+}
+function fbCopy(text, msg) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showToast('📋 ' + msg); }
+  catch { showToast('Could not copy', true); }
+  document.body.removeChild(ta);
+}
+function setDeposit(a) { document.getElementById('depositAmount').value = a; }
+function setBankDeposit(a) { document.getElementById('bankAmount').value = a; }
+
+/* ═══════════════════════════════════════════════════════════
+   STK PUSH DEPOSIT — REAL FLOW
+   ═══════════════════════════════════════════════════════════ */
+async function handleSTKPush() {
+  const phone = document.getElementById('mpesaPhone').value.trim();
+  const amount = Number(document.getElementById('depositAmount').value);
+  const statusEl = document.getElementById('stkStatus');
+  const btn = document.getElementById('depositBtn');
+
+  if (!/^254\d{9}$/.test(phone)) return showToast('Enter valid phone: 2547XXXXXXXX', true);
+  if (!amount || amount < 1) return showToast('Minimum deposit is KES 1', true);
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Sending STK Push...';
+  statusEl.textContent = 'Contacting Safaricom...';
+
+  try {
+    const res = await api('/api/deposit', {
+      method: 'POST',
+      body: JSON.stringify({ phone, amount, userId: currentUser.id }),
+    });
+
+    showToast('📱 STK Push sent! Check your phone.');
+    statusEl.textContent = '⏳ Waiting for you to enter M-Pesa PIN...';
+    btn.textContent = '⏳ Awaiting confirmation';
+
+    // Poll the backend for status
+    pollTransaction(res.transactionId);
+  } catch (err) {
+    showToast('❌ ' + err.message, true);
+    statusEl.textContent = '❌ ' + err.message;
+    btn.disabled = false;
+    btn.textContent = '📲 Send STK Push';
+  }
+}
+
+function pollTransaction(txId) {
+  if (state.pollTimer) clearInterval(state.pollTimer);
+  let attempts = 0;
+  const MAX = 40; // 40 × 3s = 2 minutes
+
+  const statusEl = document.getElementById('stkStatus');
+  const btn = document.getElementById('depositBtn');
+
+  state.pollTimer = setInterval(async () => {
+    attempts++;
+    try {
+      const tx = await api(`/api/transaction/${txId}`);
+
+      if (tx.status === 'approved') {
+        clearInterval(state.pollTimer);
+        statusEl.textContent = `✅ Payment received! Ref: ${tx.mpesaReceipt || 'N/A'}`;
+        btn.disabled = false;
+        btn.textContent = '📲 Send STK Push';
+        document.getElementById('depositAmount').value = '';
+        showToast(`✅ KES ${tx.amount} credited to your wallet`);
+        await syncBalance();
+        refreshHistory();
+      } else if (tx.status === 'rejected') {
+        clearInterval(state.pollTimer);
+        statusEl.textContent = `❌ Payment failed: ${tx.failReason || 'Cancelled'}`;
+        btn.disabled = false;
+        btn.textContent = '📲 Send STK Push';
+        showToast('❌ Payment failed or cancelled', true);
+      } else if (attempts >= MAX) {
+        clearInterval(state.pollTimer);
+        statusEl.textContent = '⏱️ Timed out. Check your M-Pesa statement.';
+        btn.disabled = false;
+        btn.textContent = '📲 Send STK Push';
+      }
+    } catch (e) {
+      // Silent retry
+    }
+  }, 3000);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MANUAL M-PESA (I Have Paid)
+   ═══════════════════════════════════════════════════════════ */
+async function handleManualMpesa() {
+  const amount = Number(document.getElementById('manualAmount').value);
+  const ref = document.getElementById('manualRef').value.trim().toUpperCase();
+  const phone = document.getElementById('mpesaPhone').value.trim();
+
+  if (!amount || amount < 10) return showToast('Minimum deposit is KES 10', true);
+  if (!ref) return showToast('Enter your M-Pesa confirmation code', true);
+
+  try {
+    await api('/api/deposit/bank', {
+      method: 'POST',
+      body: JSON.stringify({
+        userId: currentUser.id,
+        amount,
+        ref: `MPESA-MANUAL:${ref}:${phone}`,
+      }),
+    });
+    showToast('⏳ Manual deposit submitted for review');
+    document.getElementById('manualAmount').value = '';
+    document.getElementById('manualRef').value = '';
+    refreshHistory();
+  } catch (err) {
+    showToast('❌ ' + err.message, true);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BANK DEPOSIT
+   ═══════════════════════════════════════════════════════════ */
+async function handleBankDeposit() {
+  const amount = Number(document.getElementById('bankAmount').value);
+  const ref = document.getElementById('bankRef').value.trim();
+  if (!amount || amount < 100) return showToast('Minimum bank deposit is KES 100', true);
+  if (!ref) return showToast('Enter your bank reference', true);
+
+  try {
+    await api('/api/deposit/bank', {
+      method: 'POST',
+      body: JSON.stringify({ userId: currentUser.id, amount, ref }),
+    });
+    showToast('🏦 Bank deposit submitted for review', false, 'bank');
+    document.getElementById('bankAmount').value = '';
+    document.getElementById('bankRef').value = '';
+    refreshHistory();
+  } catch (err) {
+    showToast('❌ ' + err.message, true);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WITHDRAWAL
+   ═══════════════════════════════════════════════════════════ */
+async function handleWithdraw() {
+  const dest = document.getElementById('withdrawDest').value;
+  const target = document.getElementById('withdrawTarget').value.trim();
+  const amount = Number(document.getElementById('withdrawAmount').value);
+
+  if (!target) return showToast('Enter phone / account number', true);
+  if (!amount || amount < 100) return showToast('Minimum KES 100', true);
+  if (amount > state.balance) return showToast('Insufficient balance', true);
+
+  try {
+    const res = await api('/api/withdraw', {
+      method: 'POST',
+      body: JSON.stringify({ userId: currentUser.id, amount, dest, target }),
+    });
+    state.balance = Number(res.balance);
+    renderAll();
+    showToast('💸 Withdrawal requested. Processing...');
+    document.getElementById('withdrawAmount').value = '';
+    document.getElementById('withdrawTarget').value = '';
+    refreshHistory();
+  } catch (err) {
+    showToast('❌ ' + err.message, true);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TRADING
+   ═══════════════════════════════════════════════════════════ */
+function setSide(s) {
+  state.side = s;
+  document.getElementById('buyTab').classList.toggle('active', s === 'buy');
+  document.getElementById('sellTab').classList.toggle('active', s === 'sell');
+  const b = document.getElementById('submitOrderBtn');
+  b.textContent = s === 'buy' ? 'Place Buy Order' : 'Place Sell Order';
+  b.className = 'btn ' + (s === 'buy' ? 'btn-green' : 'btn-red');
+}
+
+document.addEventListener('input', e => {
+  if (e.target.id === 'orderPrice' || e.target.id === 'orderQty') {
+    const p = Number(document.getElementById('orderPrice').value) || 0;
+    const q = Number(document.getElementById('orderQty').value) || 0;
+    document.getElementById('orderTotal').value = `$${(p * q).toFixed(2)}`;
+  }
+});
+
+function submitOrder() {
+  const sym = state.symbol;
+  const price = Number(document.getElementById('orderPrice').value);
+  const qty = Number(document.getElementById('orderQty').value);
+  if (!price || !qty || qty <= 0) return showToast('Enter valid price and quantity', true);
+
+  const cost = price * qty;
+  const h = state.holdings[sym] || { qty: 0, avgPrice: 0 };
+
+  if (state.side === 'buy') {
+    if (cost > state.balance) return showToast('Insufficient balance', true);
+    const bestAsk = state.books[sym]?.asks[0]?.price || price;
+    const fp = Math.min(price, bestAsk);
+    state.balance -= fp * qty;
+    const nq = h.qty + qty;
+    const na = (h.qty * h.avgPrice + fp * qty) / nq;
+    state.holdings[sym] = { qty: nq, avgPrice: na };
+    state.trades.push({ symbol: sym, side: 'buy', price: fp, qty, timestamp: Date.now() });
+    showToast(`✅ Bought ${qty} ${sym.replace('USDT','')} @ $${fp.toFixed(2)}`);
+  } else {
+    if (h.qty < qty) return showToast('Not enough holdings', true);
+    const bestBid = state.books[sym]?.bids[0]?.price || price;
+    const fp = Math.max(price, bestBid);
+    state.balance += fp * qty;
+    const nq = h.qty - qty;
+    if (nq === 0) delete state.holdings[sym];
+    else state.holdings[sym] = { ...h, qty: nq };
+    state.trades.push({ symbol: sym, side: 'sell', price: fp, qty, timestamp: Date.now() });
+    showToast(`✅ Sold ${qty} ${sym.replace('USDT','')} @ $${fp.toFixed(2)}`);
+  }
+
+  document.getElementById('orderQty').value = '';
+  document.getElementById('orderTotal').value = '$0.00';
+  renderAll();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VIEW SWITCHING
+   ═══════════════════════════════════════════════════════════ */
+function switchView(view) {
+  document.getElementById('tradeView').style.display = view === 'trade' ? 'block' : 'none';
+  document.getElementById('historyView').style.display = view === 'history' ? 'block' : 'none';
+  document.getElementById('adminView').style.display = view === 'admin' ? 'block' : 'none';
+  document.getElementById('navTrade').classList.toggle('active', view === 'trade');
+  document.getElementById('navHistory').classList.toggle('active', view === 'history');
+  document.getElementById('navAdmin').classList.toggle('active', view === 'admin');
+
+  if (view === 'history') refreshHistory();
+  if (view === 'admin') renderAdmin();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HISTORY — pulls from BACKEND
+   ═══════════════════════════════════════════════════════════ */
+async function refreshHistory() {
+  const list = document.getElementById('txHistoryList');
+  if (!list || !currentUser || currentUser.isAdmin) return;
+  list.innerHTML = '<div class="list-empty">Loading...</div>';
+  try {
+    const txs = await api(`/api/transactions/user/${currentUser.id}`);
+    if (!txs.length) { list.innerHTML = '<div class="list-empty">No transactions yet</div>'; return; }
+    list.innerHTML = txs.map(txRow).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="list-empty">Could not load: ${e.message}</div>`;
+  }
+}
+
+function txRow(t) {
+  const cls = t.type === 'deposit' ? 'deposit' : t.type === 'withdraw' ? 'withdraw' : (t.side === 'sell' ? 'trade-sell' : 'trade-buy');
+  const sign = t.type === 'deposit' ? '+' : t.type === 'withdraw' ? '-' : (t.side === 'sell' ? '+' : '-');
+  const amtCls = sign === '+' ? 'positive' : 'negative';
+  const date = new Date(t.createdAt).toLocaleString();
+  const title = t.type === 'deposit'
+    ? `Deposit via ${t.method.toUpperCase()}`
+    : t.type === 'withdraw'
+    ? `Withdrawal via ${t.method.toUpperCase()}`
+    : `${t.side === 'buy' ? 'Buy' : 'Sell'} ${t.symbol}`;
+  return `<div class="tx-row ${cls}">
+    <div class="tx-left">
+      <div class="tx-title">${title}</div>
+      <div class="tx-meta">${date}${t.mpesaReceipt ? ' · ' + t.mpesaReceipt : t.ref && t.ref !== 'N/A' ? ' · ' + t.ref : ''}</div>
+    </div>
+    <div class="tx-right">
+      <div class="tx-amount ${amtCls}">${sign} KES ${Number(t.amount).toLocaleString()}</div>
+      <div class="tx-status ${t.status}">${t.status}</div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN — talks to backend
+   ═══════════════════════════════════════════════════════════ */
+async function renderAdmin() {
+  if (!currentUser || !currentUser.isAdmin) return;
+
+  // Pending
+  try {
+    const pending = await apiAdmin('/api/admin/transactions?status=pending');
+    const pl = document.getElementById('adminPendingList');
+    if (!pending.length) pl.innerHTML = '<div class="list-empty">No pending transactions</div>';
+    else pl.innerHTML = pending.map(t => `
+      <div class="tx-row ${t.type === 'deposit' ? 'deposit' : 'withdraw'}" style="flex-direction: column; align-items: stretch; gap: 10px;">
+        <div style="display:flex;justify-content:space-between;">
+          <div class="tx-left">
+            <div class="tx-title">${t.type.toUpperCase()} · ${t.userId}</div>
+            <div class="tx-meta">${t.method} · ${t.phone || t.ref || ''} · ${new Date(t.createdAt).toLocaleString()}</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amount ${t.type === 'deposit' ? 'positive' : 'negative'}">KES ${Number(t.amount).toLocaleString()}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-green" style="flex:1;padding:8px;" onclick="adminApprove('${t.id}')">✅ Approve</button>
+          <button class="btn btn-red" style="flex:1;padding:8px;" onclick="adminReject('${t.id}')">❌ Reject</button>
+        </div>
+      </div>`).join('');
+  } catch (e) {
+    document.getElementById('adminPendingList').innerHTML = `<div class="list-empty">${e.message}</div>`;
+  }
+
+  // Users
+  try {
+    const users = await apiAdmin('/api/admin/users');
+    const ul = document.getElementById('adminUsersList');
+    if (!users.length) ul.innerHTML = '<div class="list-empty">No users</div>';
+    else ul.innerHTML = users.map(u => `
+      <div class="tx-row">
+        <div class="tx-left">
+          <div class="tx-title">${u.name}</div>
+          <div class="tx-meta">${u.email} · ${u.phone}</div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount">KES ${(Number(u.balance) || 0).toLocaleString()}</div>
+        </div>
+      </div>`).join('');
+  } catch (e) {
+    document.getElementById('adminUsersList').innerHTML = `<div class="list-empty">${e.message}</div>`;
+  }
+
+  // All tx
+  try {
+    const all = await apiAdmin('/api/admin/transactions');
+    const al = document.getElementById('adminAllTxList');
+    if (!all.length) al.innerHTML = '<div class="list-empty">No transactions</div>';
+    else al.innerHTML = all.slice(0, 50).map(txRow).join('');
+  } catch (e) {
+    document.getElementById('adminAllTxList').innerHTML = `<div class="list-empty">${e.message}</div>`;
+  }
+}
+
+async function adminApprove(id) {
+  try {
+    await apiAdmin(`/api/admin/transaction/${id}/approve`, { method: 'POST' });
+    showToast('✅ Approved');
+    renderAdmin();
+  } catch (e) { showToast('❌ ' + e.message, true); }
+}
+
+async function adminReject(id) {
+  const note = prompt('Reason:', 'Invalid transaction') || 'Rejected';
+  try {
+    await apiAdmin(`/api/admin/transaction/${id}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ note }),
+    });
+    showToast('❌ Rejected', true);
+    renderAdmin();
+  } catch (e) { showToast('❌ ' + e.message, true); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg, isError = false, kind = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = kind ? kind : (isError ? 'error' : '');
+  if (isError && kind) el.className = 'error';
+  el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3200);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════ */
+window.addEventListener('resize', drawChart);
+checkBackend();
+setInterval(checkBackend, 30000);
+autoLogin();
+</script>
+</body>
+</html>
